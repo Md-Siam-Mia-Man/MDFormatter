@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro MDFormatter</title>
+
+  <!-- 1. Fonts: Poppins & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Poppins:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- 2. Icons: FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- 3. CSS Framework: Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 4. Animations: Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+  <!-- 5. Syntax Highlighting Theme: Atom One Dark -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            dark: {
+              900: '#0f172a', /* Slate 900 */
+              800: '#1e293b', /* Slate 800 */
+              700: '#334155',
+            },
+            accent: {
+              500: '#8b5cf6', /* Violet */
+              400: '#a78bfa',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom UI Tweaks */
+    body {
+      background-color: #0b0f19;
+      background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0b0f19 60%);
+      color: #e2e8f0;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Smooth Collapse Animation for Code Blocks */
+    .code-content-wrapper {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .code-content-wrapper.collapsed {
+      grid-template-rows: 0fr;
+    }
+
+    .code-inner {
+      overflow: hidden;
+    }
+
+    /* Markdown Output Typography */
+    .rendered-content h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #f8fafc;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 0.5rem;
+    }
+
+    .rendered-content h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.8rem;
+      color: #f1f5f9;
+    }
+
+    .rendered-content h3 {
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin-top: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #e2e8f0;
+    }
+
+    .rendered-content p {
+      margin-bottom: 1rem;
+      line-height: 1.7;
+      color: #cbd5e1;
+    }
+
+    .rendered-content ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .rendered-content ol {
+      list-style-type: decimal;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .rendered-content blockquote {
+      border-left: 4px solid #8b5cf6;
+      padding-left: 1rem;
+      color: #94a3b8;
+      font-style: italic;
+      background: rgba(139, 92, 246, 0.05);
+      padding: 12px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1rem;
+    }
+
+    .rendered-content a {
+      color: #8b5cf6;
+      text-decoration: none;
+      border-bottom: 1px dashed #8b5cf6;
+      transition: 0.2s;
+    }
+
+    .rendered-content a:hover {
+      color: #a78bfa;
+      border-bottom-style: solid;
+    }
+
+    /* Inline Code */
+    .rendered-content :not(pre)>code {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fca5a5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+    }
+
+    /* Glassmorphism Classes */
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Toast Notification */
+    .toast {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: #1e293b;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px 16px;
+      position: fixed;
+      z-index: 50;
+      bottom: 30px;
+      right: 30px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      border: 1px solid #334155;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      visibility: visible;
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden selection:bg-accent-500 selection:text-white">
+
+  <!-- Header -->
+  <header
+    class="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-dark-900/50 backdrop-blur-md z-10 shrink-0">
+    <div class="flex items-center gap-3">
+      <div
+        class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+        <i class="fa-solid fa-code text-white text-sm"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-semibold tracking-tight text-white">MDFormatter</h1>
+        <p class="text-xs text-slate-400 font-light">AI Output Cleaner & Viewer</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-slate-400 hover:text-white transition-colors duration-200">
+        <i class="fa-brands fa-github text-xl"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden relative">
+
+    <!-- Left: Input Editor -->
+    <div class="flex flex-col border-r border-white/5 bg-[#0f1115] relative group">
+      <!-- Toolbar -->
+      <div class="h-10 flex items-center justify-between px-4 bg-[#141820] border-b border-white/5">
+        <span class="text-xs font-mono text-slate-500 uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square"></i> Input
+        </span>
+        <div class="flex gap-2">
+          <button id="clearBtn"
+            class="text-xs text-slate-400 hover:text-red-400 transition-colors px-2 py-1 rounded hover:bg-white/5">
+            <i class="fa-solid fa-trash-can mr-1"></i> Clear
+          </button>
+          <button id="pasteBtn"
+            class="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/5">
+            <i class="fa-solid fa-paste mr-1"></i> Paste
+          </button>
+        </div>
+      </div>
+
+      <!-- Text Area -->
+      <textarea id="mdInput"
+        class="flex-1 w-full bg-transparent p-6 text-sm font-mono text-slate-300 resize-none focus:outline-none placeholder-slate-700 leading-relaxed"
+        placeholder="Paste your raw Markdown or AI response here..." spellcheck="false"></textarea>
+
+      <!-- Floating Render Button (Visible on mobile or logic trigger) -->
+      <div class="absolute bottom-6 right-6 lg:hidden z-20">
+        <button id="mobileRenderBtn"
+          class="bg-accent-500 text-white w-12 h-12 rounded-full shadow-lg shadow-accent-500/30 flex items-center justify-center">
+          <i class="fa-solid fa-play"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Preview Area -->
+    <div class="flex flex-col bg-[#0b0f19] relative">
+      <!-- Toolbar -->
+      <div class="h-10 flex items-center justify-between px-4 bg-[#141820] border-b border-white/5 shrink-0">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-mono text-slate-500 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-eye"></i> Preview
+          </span>
+          <span id="blockCount" class="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded-full font-mono">0
+            Blocks</span>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <div class="flex items-center mr-4 gap-2">
+            <span class="text-[10px] uppercase text-slate-500 font-bold">Auto-Run</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="autoRender" class="sr-only peer" checked>
+              <div
+                class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[0px] after:left-[0px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accent-500">
+              </div>
+            </label>
+          </div>
+
+          <div class="h-4 w-px bg-slate-700 mx-1"></div>
+
+          <button id="expandAll"
+            class="text-slate-400 hover:text-white p-1.5 rounded-md hover:bg-white/10 transition-all"
+            title="Expand All">
+            <i class="fa-solid fa-expand text-xs"></i>
+          </button>
+          <button id="collapseAll"
+            class="text-slate-400 hover:text-white p-1.5 rounded-md hover:bg-white/10 transition-all"
+            title="Collapse All">
+            <i class="fa-solid fa-compress text-xs"></i>
+          </button>
+          <button id="copyAll"
+            class="bg-white/10 hover:bg-accent-500 text-slate-200 hover:text-white px-3 py-1 rounded text-xs font-medium transition-all ml-2 flex items-center gap-2 border border-white/5">
+            <i class="fa-regular fa-copy"></i> Copy All Code
+          </button>
+        </div>
+      </div>
+
+      <!-- Rendered Output -->
+      <div id="rendered" class="flex-1 overflow-y-auto p-8 rendered-content pb-20 scroll-smooth">
+        <!-- Empty State -->
+        <div
+          class="h-full flex flex-col items-center justify-center text-slate-600 opacity-50 select-none animate__animated animate__fadeIn">
+          <i class="fa-brands fa-markdown text-6xl mb-4"></i>
+          <p class="font-light text-sm">Waiting for input...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer
+    class="bg-[#0f1115] border-t border-white/5 py-2 px-6 flex justify-between items-center shrink-0 text-[11px] text-slate-500">
+    <div>
+      Built with <span class="text-accent-500">Marked.js</span> & <span class="text-accent-500">Highlight.js</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span><span class="bg-slate-800 border border-slate-700 px-1 rounded text-slate-300 font-mono">Ctrl</span> + <span
+          class="bg-slate-800 border border-slate-700 px-1 rounded text-slate-300 font-mono">Enter</span> to Run</span>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Element -->
+  <div id="toast" class="toast">
+    <i class="fa-solid fa-circle-check text-green-400"></i>
+    <span id="toastMsg">Action Successful</span>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <script>
+    // --- 1. DOM Elements ---
+    const els = {
+      input: document.getElementById('mdInput'),
+      output: document.getElementById('rendered'),
+      autoRender: document.getElementById('autoRender'),
+      blockCount: document.getElementById('blockCount'),
+      toast: document.getElementById('toast'),
+      toastMsg: document.getElementById('toastMsg'),
+      btns: {
+        clear: document.getElementById('clearBtn'),
+        paste: document.getElementById('pasteBtn'),
+        expand: document.getElementById('expandAll'),
+        collapse: document.getElementById('collapseAll'),
+        copyAll: document.getElementById('copyAll'),
+        mobileRender: document.getElementById('mobileRenderBtn')
+      }
+    };
+
+    // --- 2. Configuration ---
+    marked.setOptions({
+      breaks: true, // Github flavored line breaks
+      gfm: true,
+      highlight: function (code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language }).value;
+      }
+    });
+
+    // --- 3. Render Function (The Magic) ---
+    const renderMarkdown = () => {
+      const rawText = els.input.value;
+
+      if (!rawText.trim()) {
+        els.output.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-slate-600 opacity-50 select-none animate__animated animate__fadeIn">
+                        <i class="fa-brands fa-markdown text-6xl mb-4"></i>
+                        <p class="font-light text-sm">Waiting for input...</p>
+                    </div>`;
+        els.blockCount.textContent = '0 Blocks';
+        return;
+      }
+
+      // Parse Markdown
+      const htmlContent = marked.parse(rawText);
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+
+      // Process Code Blocks
+      const codeBlocks = tempDiv.querySelectorAll('pre code');
+
+      codeBlocks.forEach((codeEl, index) => {
+        const pre = codeEl.parentElement;
+
+        // Detect Language
+        const langClass = (codeEl.className || '').match(/language-(\w+)/);
+        const language = langClass ? langClass[1] : 'text';
+
+        // Icon based on lang
+        let langIcon = 'fa-code';
+        if (language.includes('js') || language.includes('node')) langIcon = 'fa-brands fa-js';
+        else if (language.includes('py')) langIcon = 'fa-brands fa-python';
+        else if (language.includes('html')) langIcon = 'fa-brands fa-html5';
+        else if (language.includes('css')) langIcon = 'fa-brands fa-css3-alt';
+        else if (language.includes('react')) langIcon = 'fa-brands fa-react';
+        else if (language.includes('java')) langIcon = 'fa-brands fa-java';
+
+        // Create Custom Card
+        const card = document.createElement('div');
+        card.className = 'my-6 rounded-lg border border-slate-700 bg-[#0f1115] overflow-hidden shadow-lg transition-all duration-300 hover:border-slate-600';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between px-4 py-2 bg-[#1e293b] border-b border-slate-700 select-none cursor-pointer group';
+        header.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform duration-300 group-hover:text-white chevron-icon"></i>
+                        <div class="flex items-center gap-2 text-xs font-mono text-slate-300">
+                            <i class="${langIcon} text-accent-400"></i>
+                            <span class="uppercase font-semibold tracking-wider text-accent-400">${language}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                         <span class="text-[10px] text-slate-600 font-mono hidden sm:inline-block">Block #${index + 1}</span>
+                    </div>
+                `;
+
+        // Content Wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-content-wrapper';
+
+        const inner = document.createElement('div');
+        inner.className = 'code-inner relative group/code'; // Relative for copy button positioning
+
+        // Floating Copy Button inside the code area
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'absolute top-2 right-2 z-10 p-2 rounded bg-slate-800/80 text-slate-400 hover:text-white hover:bg-accent-500 opacity-0 group-hover/code:opacity-100 transition-all duration-200 border border-slate-700 backdrop-blur-sm text-xs flex items-center gap-1';
+        copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> <span class="font-sans">Copy</span>';
+
+        // The actual pre element
+        const newPre = document.createElement('pre');
+        newPre.className = 'm-0 p-4 overflow-x-auto text-sm font-mono bg-[#0f1115]';
+        // Highlight happens automatically via hljs class names if marked does it, 
+        // but we explicitly call highlightElement later to be safe
+        newPre.innerHTML = codeEl.innerHTML;
+        newPre.className = codeEl.className; // Keep hljs classes
+
+        inner.appendChild(copyBtn);
+        inner.appendChild(newPre);
+        wrapper.appendChild(inner);
+
+        card.appendChild(header);
+        card.appendChild(wrapper);
+
+        // --- Event Listeners for this block ---
+
+        // 1. Collapse Toggle
+        header.addEventListener('click', () => {
+          const chevron = header.querySelector('.chevron-icon');
+          const isCollapsed = wrapper.classList.contains('collapsed');
+
+          if (isCollapsed) {
+            wrapper.classList.remove('collapsed');
+            chevron.style.transform = 'rotate(0deg)';
+          } else {
+            wrapper.classList.add('collapsed');
+            chevron.style.transform = 'rotate(-90deg)';
+          }
+        });
+
+        // 2. Copy Code
+        copyBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navigator.clipboard.writeText(codeEl.textContent).then(() => {
+            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span class="font-sans">Copied!</span>';
+            copyBtn.classList.add('bg-green-600', 'text-white', 'border-transparent');
+            showToast('Code block copied successfully');
+            setTimeout(() => {
+              copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> <span class="font-sans">Copy</span>';
+              copyBtn.classList.remove('bg-green-600', 'text-white', 'border-transparent');
+            }, 2000);
+          });
+        });
+
+        // Replace old pre with new card
+        pre.replaceWith(card);
+      });
+
+      // Put result in DOM
+      els.output.innerHTML = '';
+      els.output.appendChild(tempDiv);
+
+      // Re-run highlight just in case marked missed classes or for safety
+      document.querySelectorAll('pre code').forEach((el) => {
+        hljs.highlightElement(el);
+      });
+
+      // Update stats
+      els.blockCount.textContent = `${codeBlocks.length} Blocks`;
+    };
+
+    // --- 4. Helper Functions ---
+
+    const showToast = (msg, isError = false) => {
+      els.toastMsg.innerText = msg;
+      els.toast.querySelector('i').className = isError
+        ? "fa-solid fa-circle-exclamation text-red-400"
+        : "fa-solid fa-circle-check text-green-400";
+
+      els.toast.classList.add('show');
+      setTimeout(() => {
+        els.toast.classList.remove('show');
+      }, 3000);
+    };
+
+    const toggleAll = (collapse) => {
+      const wrappers = document.querySelectorAll('.code-content-wrapper');
+      const chevrons = document.querySelectorAll('.chevron-icon');
+
+      wrappers.forEach(w => {
+        if (collapse) w.classList.add('collapsed');
+        else w.classList.remove('collapsed');
+      });
+
+      chevrons.forEach(c => {
+        c.style.transform = collapse ? 'rotate(-90deg)' : 'rotate(0deg)';
+      });
+    };
+
+    // --- 5. Global Event Listeners ---
+
+    // Auto Render Logic
+    let timeout = null;
+    els.input.addEventListener('input', () => {
+      if (els.autoRender.checked) {
+        clearTimeout(timeout);
+        timeout = setTimeout(renderMarkdown, 500); // 500ms debounce
+      }
+    });
+
+    // Ctrl + Enter
+    els.input.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        renderMarkdown();
+      }
+    });
+
+    // Buttons
+    els.btns.clear.addEventListener('click', () => {
+      els.input.value = '';
+      renderMarkdown();
+      els.input.focus();
+      showToast('Editor cleared');
+    });
+
+    els.btns.paste.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        els.input.value = text;
+        renderMarkdown();
+        showToast('Content pasted from clipboard');
+      } catch (err) {
+        showToast('Permission to read clipboard denied', true);
+      }
+    });
+
+    els.btns.expand.addEventListener('click', () => toggleAll(false));
+    els.btns.collapse.addEventListener('click', () => toggleAll(true));
+
+    els.btns.copyAll.addEventListener('click', () => {
+      const codes = Array.from(document.querySelectorAll('.code-card pre code, .code-inner pre')) // Selector logic tweak based on structure
+        .map(el => el.textContent)
+        .join('\n\n// --- NEXT BLOCK ---\n\n');
+
+      if (!codes) {
+        showToast('No code blocks found', true);
+        return;
+      }
+
+      navigator.clipboard.writeText(codes).then(() => showToast('All code blocks copied!'));
+    });
+
+    if (els.btns.mobileRender) {
+      els.btns.mobileRender.addEventListener('click', renderMarkdown);
+    }
+
+    // --- 6. Init ---
+    // Set a demo text on load
+    const demoText = `# Welcome to MDFormatter 🚀
+
+Here you can paste **ChatGPT**, **Claude**, or **GitHub Copilot** responses. We will extract the code blocks and make them look beautiful.
+
+### Features
+1. **Syntax Highlighting** (Atom One Dark)
+2. **Collapsible Blocks**
+3. **One-click Copy**
+
+\`\`\`javascript
+// Sample Javascript Block
+const greet = (name) => {
+    console.log(\`Hello, \${name}!\`);
+    return true;
+}
+\`\`\`
+
+\`\`\`python
+# Sample Python Block
+def fib(n):
+    a, b = 0, 1
+    while a < n:
+        print(a, end=' ')
+        a, b = b, a+b
+\`\`\`
+`;
+    els.input.value = demoText;
+    renderMarkdown();
+
+  </script>
+</body>
+
+</html>
