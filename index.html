@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monokai Pro Markdown Formatter</title>
+  <title>Markdown Formatter</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap"
     rel="stylesheet">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css">
@@ -30,12 +30,33 @@
       --text-main: #FCFCFA;
       --text-dim: #939293;
       --border: rgba(255, 255, 255, 0.1);
-
-      --font-ui: 'Poppins', sans-serif;
+      --font-ui: 'Poppins', 'Hind Siliguri', sans-serif;
       --font-code: 'JetBrains Mono', monospace;
-
       --radius: 8px;
       --anim-speed: 0.2s;
+    }
+
+    @font-face {
+      font-family: 'Material Icons';
+      font-style: normal;
+      font-weight: 400;
+      src: url(https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/font/MaterialIcons-Regular.ttf) format('truetype');
+    }
+
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+      vertical-align: middle;
     }
 
     * {
@@ -92,8 +113,9 @@
       color: var(--accent-yellow);
     }
 
-    .brand i {
+    .brand .material-icons {
       color: var(--accent-red);
+      font-size: 24px;
     }
 
     .controls {
@@ -108,12 +130,16 @@
       padding: 6px 12px;
       border-radius: var(--radius);
       font-family: var(--font-ui);
-      font-size: 12px;
+      font-size: 13px;
       cursor: pointer;
       transition: all var(--anim-speed) ease;
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .btn .material-icons {
+      font-size: 16px;
     }
 
     .btn:hover {
@@ -313,6 +339,11 @@
       color: var(--accent-blue);
     }
 
+    .lang-tag .material-icons {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
     .code-actions {
       display: flex;
       gap: 8px;
@@ -330,6 +361,10 @@
       align-items: center;
       gap: 5px;
       font-size: 12px;
+    }
+
+    .action-btn .material-icons {
+      font-size: 14px;
     }
 
     .action-btn:hover {
@@ -377,6 +412,13 @@
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #toast .material-icons {
+      font-size: 18px;
     }
 
     #toast.show {
@@ -399,7 +441,7 @@
         padding: 15px;
       }
 
-      .brand span {
+      .brand span:not(.material-icons) {
         display: none;
       }
     }
@@ -408,20 +450,21 @@
 
 <body>
 
-  <header>
+  <header class="animate__animated animate__fadeInDown">
     <div class="brand">
-      <i class="fa-solid fa-code"></i>
-      <span>Monokai Format</span>
+      <span class="material-icons">code</span>
+      <span>Markdown Formatter</span>
     </div>
     <div class="controls">
-      <button class="btn danger" id="clearBtn" title="Clear Input"><i class="fa-solid fa-trash"></i></button>
-      <button class="btn" id="toggleAllBtn"><i class="fa-solid fa-expand"></i> Expand/Collapse</button>
-      <button class="btn" id="exportBtn"><i class="fa-solid fa-file-export"></i> Export HTML</button>
-      <button class="btn primary" id="copyAllBtn"><i class="fa-solid fa-copy"></i> Copy All Code</button>
+      <button class="btn danger" id="clearBtn" title="Clear Input"><span class="material-icons">delete</span></button>
+      <button class="btn" id="toggleAllBtn"><span class="material-icons">unfold_more</span> Expand/Collapse</button>
+      <button class="btn" id="exportBtn"><span class="material-icons">file_download</span> Export HTML</button>
+      <button class="btn primary" id="copyAllBtn"><span class="material-icons">content_copy</span> Copy All
+        Code</button>
     </div>
   </header>
 
-  <main>
+  <main class="animate__animated animate__fadeIn">
     <div class="editor-container">
       <textarea id="input" placeholder="Paste your messy Markdown or AI response here..."></textarea>
     </div>
@@ -431,7 +474,7 @@
     </div>
   </main>
 
-  <div id="toast"><i class="fa-solid fa-check"></i> Copied to clipboard!</div>
+  <div id="toast"><span class="material-icons">check_circle</span> Copied to clipboard!</div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
@@ -477,49 +520,50 @@
 
         const pre = block.parentElement;
         const wrapper = document.createElement('div');
-        wrapper.className = 'code-wrapper';
+        wrapper.className = 'code-wrapper animate__animated animate__fadeIn';
 
         const header = document.createElement('div');
         header.className = 'code-header';
 
         header.innerHTML = `
-                    <div class="lang-tag">
-                        <i class="fa-solid fa-terminal" style="font-size:10px; opacity:0.7;"></i> ${lang}
-                    </div>
-                    <div class="code-actions">
-                        <button class="action-btn toggle-btn" title="Collapse">
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </button>
-                        <button class="action-btn copy-btn" title="Copy Code">
-                            <i class="fa-regular fa-copy"></i> Copy
-                        </button>
-                    </div>
-                `;
+            <div class="lang-tag">
+                ${lang}
+            </div>
+            <div class="code-actions">
+                <button class="action-btn toggle-btn" title="Collapse">
+                    <span class="material-icons">expand_more</span>
+                </button>
+                <button class="action-btn copy-btn" title="Copy Code">
+                    <span class="material-icons">content_copy</span> Copy
+                </button>
+            </div>
+        `;
 
         pre.parentNode.insertBefore(wrapper, pre);
         wrapper.appendChild(header);
         wrapper.appendChild(pre);
 
         const copyBtn = header.querySelector('.copy-btn');
+        const copyIcon = copyBtn.querySelector('.material-icons');
         const toggleBtn = header.querySelector('.toggle-btn');
+        const toggleIcon = toggleBtn.querySelector('.material-icons');
 
         copyBtn.addEventListener('click', () => {
           copyToClipboard(block.innerText);
-          copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+          copyBtn.innerHTML = '<span class="material-icons">check</span> Copied';
           copyBtn.classList.add('active');
           setTimeout(() => {
-            copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+            copyBtn.innerHTML = '<span class="material-icons">content_copy</span> Copy';
             copyBtn.classList.remove('active');
           }, 2000);
         });
 
         toggleBtn.addEventListener('click', () => {
           wrapper.classList.toggle('collapsed');
-          const icon = toggleBtn.querySelector('i');
           if (wrapper.classList.contains('collapsed')) {
-            icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+            toggleIcon.textContent = 'chevron_right';
           } else {
-            icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
+            toggleIcon.textContent = 'expand_more';
           }
         });
       });
@@ -556,20 +600,20 @@
     document.getElementById('toggleAllBtn').addEventListener('click', function () {
       isAllCollapsed = !isAllCollapsed;
       const wrappers = outputEl.querySelectorAll('.code-wrapper');
-      const icon = this.querySelector('i');
+      const icon = this.querySelector('.material-icons');
 
       wrappers.forEach(w => {
-        const toggleBtn = w.querySelector('.toggle-btn i');
+        const toggleIcon = w.querySelector('.toggle-btn .material-icons');
         if (isAllCollapsed) {
           w.classList.add('collapsed');
-          toggleBtn.classList.replace('fa-chevron-down', 'fa-chevron-right');
+          if (toggleIcon) toggleIcon.textContent = 'chevron_right';
         } else {
           w.classList.remove('collapsed');
-          toggleBtn.classList.replace('fa-chevron-right', 'fa-chevron-down');
+          if (toggleIcon) toggleIcon.textContent = 'expand_more';
         }
       });
 
-      icon.classList = isAllCollapsed ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+      icon.textContent = isAllCollapsed ? 'unfold_less' : 'unfold_more';
     });
 
     document.getElementById('clearBtn').addEventListener('click', () => {
@@ -596,9 +640,30 @@
           --text-main: #FCFCFA;
           --text-dim: #939293;
           --border: rgba(255, 255, 255, 0.1);
-          --font-ui: 'Poppins', sans-serif;
+          --font-ui: 'Poppins', 'Hind Siliguri', sans-serif;
           --font-code: 'JetBrains Mono', monospace;
           --radius: 8px;
+        }
+        @font-face {
+          font-family: 'Material Icons';
+          font-style: normal;
+          font-weight: 400;
+          src: url(https://cdnjs.cloudflare.com/ajax/libs/material-design-icons/4.0.0/font/MaterialIcons-Regular.ttf) format('truetype');
+        }
+        .material-icons {
+          font-family: 'Material Icons';
+          font-weight: normal;
+          font-style: normal;
+          font-size: 20px;
+          display: inline-block;
+          line-height: 1;
+          text-transform: none;
+          letter-spacing: normal;
+          word-wrap: normal;
+          white-space: nowrap;
+          direction: ltr;
+          -webkit-font-smoothing: antialiased;
+          vertical-align: middle;
         }
         body {
           background-color: var(--bg);
@@ -638,10 +703,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monokai Export</title>
+    <title>Export</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css">
     <style>${styles}</style>
 </head>
@@ -669,12 +734,13 @@
 
     const initialText = `# Welcome to Monokai Formatter
 
-Paste your **Markdown** or ChatGPT responses on the left.
+Paste your **Markdown** or **AI** responses on the left.
 
 ## Features
 1. **Monokai Pro** Theme
 2. Auto syntax highlighting
-3. Export as HTML (New!)
+3. Material Icons (New!)
+4. Smooth Animations
 
 ### Example Code
 
