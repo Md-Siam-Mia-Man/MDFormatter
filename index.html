@@ -6,26 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monokai Pro Markdown Formatter</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap"
     rel="stylesheet">
 
-  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Highlight.js Theme (Monokai Sublime to match) -->
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css">
 
   <style>
     :root {
-      /* Monokai Pro Palette */
       --bg: #2D2A2E;
       --sidebar: #403E41;
-      /* Slightly lighter for panels */
       --accent-red: #FF6188;
       --accent-orange: #FC9867;
       --accent-yellow: #FFD866;
@@ -59,7 +54,6 @@
       flex-direction: column;
     }
 
-    /* --- Scrollbar Styling --- */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -78,7 +72,6 @@
       background: var(--text-dim);
     }
 
-    /* --- Header --- */
     header {
       height: 60px;
       border-bottom: 1px solid var(--border);
@@ -108,7 +101,6 @@
       gap: 10px;
     }
 
-    /* --- Buttons --- */
     .btn {
       background: var(--sidebar);
       border: 1px solid var(--border);
@@ -147,7 +139,6 @@
       color: var(--accent-red);
     }
 
-    /* --- Main Layout --- */
     main {
       flex: 1;
       display: grid;
@@ -155,13 +146,11 @@
       height: calc(100vh - 60px);
     }
 
-    /* --- Input Area --- */
     .editor-container {
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       background: #221F22;
-      /* Slightly darker than bg */
     }
 
     textarea {
@@ -182,7 +171,6 @@
       opacity: 0.5;
     }
 
-    /* --- Preview Area --- */
     .preview-container {
       padding: 20px 40px;
       overflow-y: auto;
@@ -190,7 +178,6 @@
       scroll-behavior: smooth;
     }
 
-    /* --- Markdown Content Styles --- */
     .markdown-body {
       max-width: 900px;
       margin: 0 auto;
@@ -289,10 +276,8 @@
       color: var(--accent-yellow);
     }
 
-    /* --- Enhanced Code Blocks --- */
     .code-wrapper {
       background: #191919;
-      /* Deep black for contrast */
       border-radius: var(--radius);
       margin: 1.5em 0;
       border: 1px solid var(--border);
@@ -370,7 +355,6 @@
       overflow-x: auto;
     }
 
-    /* Collapse functionality */
     .code-wrapper.collapsed .hljs {
       display: none;
     }
@@ -379,7 +363,6 @@
       border-bottom: 1px solid var(--border);
     }
 
-    /* --- Toast Notification --- */
     #toast {
       position: fixed;
       bottom: 20px;
@@ -401,7 +384,6 @@
       opacity: 1;
     }
 
-    /* --- Mobile Responsive --- */
     @media (max-width: 768px) {
       main {
         grid-template-columns: 1fr;
@@ -434,17 +416,16 @@
     <div class="controls">
       <button class="btn danger" id="clearBtn" title="Clear Input"><i class="fa-solid fa-trash"></i></button>
       <button class="btn" id="toggleAllBtn"><i class="fa-solid fa-expand"></i> Expand/Collapse</button>
+      <button class="btn" id="exportBtn"><i class="fa-solid fa-file-export"></i> Export HTML</button>
       <button class="btn primary" id="copyAllBtn"><i class="fa-solid fa-copy"></i> Copy All Code</button>
     </div>
   </header>
 
   <main>
-    <!-- Input Section -->
     <div class="editor-container">
       <textarea id="input" placeholder="Paste your messy Markdown or AI response here..."></textarea>
     </div>
 
-    <!-- Output Section -->
     <div class="preview-container">
       <div id="output" class="markdown-body"></div>
     </div>
@@ -452,26 +433,20 @@
 
   <div id="toast"><i class="fa-solid fa-check"></i> Copied to clipboard!</div>
 
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 
   <script>
-    // --- Setup & Configuration ---
     const inputEl = document.getElementById('input');
     const outputEl = document.getElementById('output');
     const toastEl = document.getElementById('toast');
     let isAllCollapsed = false;
 
-    // Configure Marked
     marked.setOptions({
-      breaks: true, // Render newlines as <br>
-      gfm: true,    // Github Flavored Markdown
+      breaks: true,
+      gfm: true,
     });
 
-    // --- Core Logic ---
-
-    // 1. Debounce function to prevent lag on typing
     function debounce(func, wait) {
       let timeout;
       return function (...args) {
@@ -480,25 +455,19 @@
       };
     }
 
-    // 2. Render Markdown
     function render() {
       const rawMarkdown = inputEl.value;
       const html = marked.parse(rawMarkdown);
       outputEl.innerHTML = html;
-
       postProcess();
     }
 
-    // 3. Post-Process (Highlighting + Wrapping Code Blocks)
     function postProcess() {
-      // Select all code blocks that are inside a pre tag
       const blocks = outputEl.querySelectorAll('pre code');
 
       blocks.forEach((block, index) => {
-        // Apply syntax highlighting
         hljs.highlightElement(block);
 
-        // Get language
         let lang = 'Text';
         block.classList.forEach(cls => {
           if (cls.startsWith('language-')) {
@@ -506,12 +475,10 @@
           }
         });
 
-        // Create Wrapper structure
         const pre = block.parentElement;
         const wrapper = document.createElement('div');
         wrapper.className = 'code-wrapper';
 
-        // Header UI
         const header = document.createElement('div');
         header.className = 'code-header';
 
@@ -529,16 +496,13 @@
                     </div>
                 `;
 
-        // Insert wrapper before pre, then move pre inside wrapper
         pre.parentNode.insertBefore(wrapper, pre);
         wrapper.appendChild(header);
         wrapper.appendChild(pre);
 
-        // Add event listeners for this specific block
         const copyBtn = header.querySelector('.copy-btn');
         const toggleBtn = header.querySelector('.toggle-btn');
 
-        // Copy single block
         copyBtn.addEventListener('click', () => {
           copyToClipboard(block.innerText);
           copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
@@ -549,7 +513,6 @@
           }, 2000);
         });
 
-        // Toggle visibility
         toggleBtn.addEventListener('click', () => {
           wrapper.classList.toggle('collapsed');
           const icon = toggleBtn.querySelector('i');
@@ -561,13 +524,9 @@
         });
       });
 
-      // Make links open in new tab
       outputEl.querySelectorAll('a').forEach(a => a.target = '_blank');
     }
 
-    // --- Global Actions ---
-
-    // Copy Helper
     async function copyToClipboard(text) {
       try {
         await navigator.clipboard.writeText(text);
@@ -577,13 +536,11 @@
       }
     }
 
-    // Show Toast
     function showToast() {
       toastEl.classList.add('show');
       setTimeout(() => toastEl.classList.remove('show'), 2000);
     }
 
-    // Copy All Code Blocks
     document.getElementById('copyAllBtn').addEventListener('click', () => {
       const blocks = outputEl.querySelectorAll('pre code');
       if (blocks.length === 0) return;
@@ -596,7 +553,6 @@
       copyToClipboard(allCode);
     });
 
-    // Expand/Collapse All
     document.getElementById('toggleAllBtn').addEventListener('click', function () {
       isAllCollapsed = !isAllCollapsed;
       const wrappers = outputEl.querySelectorAll('.code-wrapper');
@@ -616,7 +572,6 @@
       icon.classList = isAllCollapsed ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
     });
 
-    // Clear Input
     document.getElementById('clearBtn').addEventListener('click', () => {
       if (confirm("Clear everything?")) {
         inputEl.value = '';
@@ -624,10 +579,94 @@
       }
     });
 
-    // --- Init ---
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const rawMarkdown = inputEl.value;
+      const htmlContent = marked.parse(rawMarkdown);
+
+      const styles = `
+        :root {
+          --bg: #2D2A2E;
+          --sidebar: #403E41;
+          --accent-red: #FF6188;
+          --accent-orange: #FC9867;
+          --accent-yellow: #FFD866;
+          --accent-green: #A9DC76;
+          --accent-blue: #78DCE8;
+          --accent-purple: #AB9DF2;
+          --text-main: #FCFCFA;
+          --text-dim: #939293;
+          --border: rgba(255, 255, 255, 0.1);
+          --font-ui: 'Poppins', sans-serif;
+          --font-code: 'JetBrains Mono', monospace;
+          --radius: 8px;
+        }
+        body {
+          background-color: var(--bg);
+          color: var(--text-main);
+          font-family: var(--font-ui);
+          margin: 0;
+          padding: 40px;
+        }
+        .markdown-body {
+          max-width: 900px;
+          margin: 0 auto;
+          line-height: 1.7;
+          font-size: 15px;
+        }
+        h1, h2, h3 { color: var(--accent-green); margin-top: 1.5em; margin-bottom: 0.5em; font-weight: 600; }
+        h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; }
+        p { margin-bottom: 1em; color: #fcfcfa; }
+        a { color: var(--accent-blue); text-decoration: none; border-bottom: 1px dashed var(--accent-blue); }
+        a:hover { border-bottom-style: solid; }
+        strong { color: var(--accent-red); }
+        em { color: var(--accent-orange); }
+        blockquote { border-left: 4px solid var(--accent-purple); margin: 1em 0; padding-left: 1em; color: var(--text-dim); font-style: italic; }
+        ul, ol { padding-left: 20px; }
+        img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border); }
+        code:not(pre code) { background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; font-family: var(--font-code); font-size: 0.9em; color: var(--accent-orange); }
+        table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+        th, td { border: 1px solid var(--border); padding: 8px 12px; }
+        th { background: var(--sidebar); color: var(--accent-yellow); }
+        pre { background: #191919; border-radius: var(--radius); margin: 1.5em 0; border: 1px solid var(--border); padding: 15px; overflow-x: auto; }
+        code.hljs { font-family: var(--font-code); font-size: 13px; line-height: 1.5; background: transparent !important; padding: 0 !important; }
+      `;
+
+      const fullHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monokai Export</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css">
+    <style>${styles}</style>
+</head>
+<body>
+    <div class="markdown-body">
+        ${htmlContent}
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"><\/script>
+    <script>hljs.highlightAll();<\/script>
+</body>
+</html>`;
+
+      const blob = new Blob([fullHtml], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Export.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
     inputEl.addEventListener('input', debounce(render, 300));
 
-    // Initial placeholder text to show capabilities
     const initialText = `# Welcome to Monokai Formatter
 
 Paste your **Markdown** or ChatGPT responses on the left.
@@ -635,8 +674,7 @@ Paste your **Markdown** or ChatGPT responses on the left.
 ## Features
 1. **Monokai Pro** Theme
 2. Auto syntax highlighting
-3. Collapse/Expand code blocks
-4. "Copy All Code" button
+3. Export as HTML (New!)
 
 ### Example Code
 
@@ -647,19 +685,11 @@ function helloWorld() {
 }
 \`\`\`
 
-\`\`\`css
-body {
-  background: #2D2A2E;
-  color: #FCFCFA;
-}
-\`\`\`
-
 > Enjoy the clean interface!
 `;
 
     inputEl.value = initialText;
     render();
-
   </script>
 </body>
 
